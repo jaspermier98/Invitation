@@ -727,7 +727,11 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, contact, pledge, item })
       });
-      if(!resp.ok) throw new Error('save failed');
+      if(!resp.ok){
+        let detail = '';
+        try{ const errJson = await resp.json(); detail = errJson.detail || errJson.error || ''; }catch(e){}
+        throw new Error(detail || ('HTTP ' + resp.status));
+      }
 
       formMsg.textContent = '✅ Threat confirmed. You have officially been phished — see you at the dam, 8–10AM.';
       formMsg.classList.add('ok');
@@ -737,7 +741,7 @@
       updateRadioStyles();
       loadBoard();
     }catch(err){
-      formMsg.textContent = '⚠ Something glitched in the scam server. Try again in a bit.';
+      formMsg.textContent = '⚠ Server error: ' + (err && err.message ? err.message : 'unknown') + '. Try again in a bit.';
       formMsg.classList.add('err');
     }finally{
       submitBtn.disabled = false;

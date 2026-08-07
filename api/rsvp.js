@@ -1,4 +1,6 @@
-const { kv } = require('@vercel/kv');
+const { Redis } = require('@upstash/redis');
+
+const redis = Redis.fromEnv();
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -28,15 +30,15 @@ module.exports = async (req, res) => {
       ts: Date.now(),
     };
 
-    await kv.set(`rsvp:${id}`, record);
+    await redis.set(`rsvp:${id}`, record);
 
-    const ids = (await kv.get('rsvp:index')) || [];
+    const ids = (await redis.get('rsvp:index')) || [];
     ids.push(id);
-    await kv.set('rsvp:index', ids);
+    await redis.set('rsvp:index', ids);
 
     res.status(200).json({ ok: true, record });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to save RSVP' });
+    res.status(500).json({ error: 'Failed to save RSVP', detail: String((err && err.message) || err) });
   }
 };

@@ -1,4 +1,6 @@
-const { kv } = require('@vercel/kv');
+const { Redis } = require('@upstash/redis');
+
+const redis = Redis.fromEnv();
 
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
@@ -7,11 +9,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const ids = (await kv.get('rsvp:index')) || [];
+    const ids = (await redis.get('rsvp:index')) || [];
     const entries = [];
 
     for (const id of ids) {
-      const rec = await kv.get(`rsvp:${id}`);
+      const rec = await redis.get(`rsvp:${id}`);
       if (rec) entries.push(rec);
     }
 
@@ -19,6 +21,6 @@ module.exports = async (req, res) => {
     res.status(200).json({ entries });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to load list' });
+    res.status(500).json({ error: 'Failed to load list', detail: String((err && err.message) || err) });
   }
 };
