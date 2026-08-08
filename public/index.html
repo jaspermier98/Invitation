@@ -127,16 +127,20 @@
     display:inline-flex; align-items:center; gap:8px;
     font-family:'IBM Plex Mono', monospace;
     font-size:12px; font-weight:600;
-    color:var(--ember-soft);
-    background:rgba(232,135,58,0.1);
-    border:1px solid rgba(232,135,58,0.35);
+    color:#ffd9ab;
+    background:rgba(8,16,18,0.72);
+    border:1px solid rgba(232,135,58,0.55);
     padding:6px 12px;
     border-radius:3px;
     margin-bottom:22px;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    box-shadow:0 2px 16px rgba(0,0,0,0.35);
   }
   .eyebrow .dot{
     width:6px; height:6px; border-radius:50%;
     background:var(--ember);
+    box-shadow:0 0 8px rgba(232,135,58,0.9);
     animation:pulse 1.6s ease-in-out infinite;
   }
   @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
@@ -231,7 +235,10 @@
     background-size:cover;
     background-position:center;
     border:1px solid var(--line);
+    cursor:zoom-in;
+    transition:filter .2s ease;
   }
+  .itin-photo:hover{ filter:brightness(1.08); }
   .itin-photo::after{
     content:"";
     position:absolute; inset:0;
@@ -298,7 +305,10 @@
     background-position:center;
     border:1px solid var(--line);
     min-height:260px;
+    cursor:zoom-in;
+    transition:filter .2s ease;
   }
+  .g-item:hover{ filter:brightness(1.08); }
   .g-item.tall{ grid-row: span 2; min-height:100%; }
   .g-item::after{
     content:"";
@@ -463,6 +473,154 @@
   @media (max-width:520px){
     .gallery-grid{ grid-template-columns:1fr; }
   }
+
+  /* ---------- LIGHTBOX ---------- */
+  .lightbox{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(4,8,9,0.94);
+    display:none;
+    align-items:center; justify-content:center;
+    padding:5vh 5vw;
+    backdrop-filter:blur(4px);
+  }
+  .lightbox.active{ display:flex; }
+  .lightbox img{
+    max-width:92vw; max-height:92vh;
+    object-fit:contain;
+    border-radius:6px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  }
+  .lightbox-close{
+    position:fixed; top:20px; right:24px;
+    background:rgba(18,38,41,0.85);
+    border:1px solid var(--line);
+    color:var(--sand);
+    font-size:22px;
+    width:42px; height:42px;
+    border-radius:50%;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    z-index:201;
+  }
+  .lightbox-close:hover{ border-color:var(--ember); color:var(--ember-soft); }
+
+  /* ---------- ADMIN TRIGGER ---------- */
+  .admin-trigger{
+    position:fixed; bottom:18px; right:18px; z-index:150;
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(18,38,41,0.7);
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    opacity:0.35;
+    transition:opacity .15s ease, border-color .15s ease;
+  }
+  .admin-trigger:hover{ opacity:1; border-color:var(--ember); }
+
+  /* ---------- ADMIN MODAL ---------- */
+  .admin-overlay{
+    position:fixed; inset:0; z-index:300;
+    background:rgba(4,8,9,0.85);
+    display:none;
+    align-items:center; justify-content:center;
+    padding:4vh 4vw;
+    backdrop-filter:blur(3px);
+  }
+  .admin-overlay.active{ display:flex; }
+  .admin-box{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    width:100%;
+    max-width:420px;
+    padding:30px;
+    position:relative;
+  }
+  .admin-panel{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    width:100%;
+    max-width:920px;
+    max-height:90vh;
+    overflow-y:auto;
+    padding:30px;
+    position:relative;
+  }
+  .admin-close{
+    position:absolute; top:18px; right:18px;
+    background:none; border:none;
+    color:var(--muted);
+    font-size:22px;
+    cursor:pointer;
+  }
+  .admin-close:hover{ color:var(--sand); }
+  .admin-title{ font-family:'Anton', sans-serif; font-size:1.3rem; margin-bottom:6px; }
+  .admin-sub{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--muted); margin-bottom:20px; }
+  .admin-stats{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+    margin-bottom:24px;
+  }
+  .admin-stat{
+    background:var(--bg-deep);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px;
+    text-align:center;
+  }
+  .admin-stat .num{ font-family:'Anton', sans-serif; font-size:1.8rem; color:var(--ember-soft); }
+  .admin-stat .lbl{ font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--muted); margin-top:2px; }
+  .admin-chart-wrap{
+    display:flex; align-items:center; gap:20px;
+    background:var(--bg-deep);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px;
+    margin-bottom:24px;
+  }
+  .admin-actions{
+    display:flex; gap:10px; flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .admin-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; font-weight:600;
+    padding:9px 14px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--bg-deep);
+    color:var(--sand);
+    cursor:pointer;
+  }
+  .admin-btn:hover{ border-color:var(--ember); }
+  .admin-btn.danger{ border-color:rgba(178,58,46,0.5); color:#f0a89f; }
+  .admin-btn.danger:hover{ background:rgba(178,58,46,0.15); }
+  .admin-btn:disabled{ opacity:0.4; cursor:default; }
+  .admin-table-wrap{ overflow-x:auto; }
+  .admin-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .admin-table th{
+    text-align:left; font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px; color:var(--muted); font-weight:600;
+    padding:8px 10px; border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  .admin-table td{
+    padding:9px 10px; border-bottom:1px solid var(--line);
+    color:var(--sand); vertical-align:top;
+  }
+  .admin-table tr:hover td{ background:rgba(255,255,255,0.02); }
+  .admin-field{
+    width:100%; background:var(--bg-deep); border:1px solid var(--line);
+    color:var(--sand); padding:12px 14px; border-radius:6px;
+    font-family:'Work Sans', sans-serif; font-size:14px; outline:none;
+    margin-bottom:14px;
+  }
+  .admin-field:focus{ border-color:var(--ember); }
+  .admin-msg{ font-family:'IBM Plex Mono', monospace; font-size:12px; margin-top:8px; }
+  .admin-msg.err{ color:#f0a89f; }
 </style>
 </head>
 <body>
@@ -727,6 +885,14 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, contact, pledge, item })
       });
+      if(resp.status === 409){
+        let detail = "You're already on the list — no need to submit twice.";
+        try{ const errJson = await resp.json(); detail = errJson.error || detail; }catch(e){}
+        formMsg.textContent = '⚠ ' + detail;
+        formMsg.classList.add('err');
+        localStorage.setItem('fishingscam_rsvp_done', '1');
+        return;
+      }
       if(!resp.ok){
         let detail = '';
         try{ const errJson = await resp.json(); detail = errJson.detail || errJson.error || ''; }catch(e){}
@@ -735,6 +901,7 @@
 
       formMsg.textContent = '✅ Threat confirmed. You have officially been phished — see you at the dam, 8–10AM.';
       formMsg.classList.add('ok');
+      localStorage.setItem('fishingscam_rsvp_done', '1');
       form.reset();
       updateRadioStyles();
       document.querySelector('input[name=pledge][value=body]').checked = true;
@@ -749,8 +916,313 @@
     }
   });
 
+  if(localStorage.getItem('fishingscam_rsvp_done') === '1'){
+    formMsg.textContent = "✅ Looks like you've already confirmed on this device. Submit again only if you need to update your pledge.";
+    formMsg.classList.add('ok');
+  }
+
   loadBoard();
+
+  /* ---------- LIGHTBOX ---------- */
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(bgEl){
+    const style = getComputedStyle(bgEl).backgroundImage;
+    const match = style.match(/url\(["']?(.*?)["']?\)/);
+    if(!match) return;
+    lightboxImg.src = match[1];
+    lightbox.classList.add('active');
+  }
+  function closeLightbox(){
+    lightbox.classList.remove('active');
+    lightboxImg.src = '';
+  }
+  document.querySelectorAll('.itin-photo, .g-item').forEach(el=>{
+    el.addEventListener('click', ()=> openLightbox(el));
+  });
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (ev)=>{ if(ev.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', (ev)=>{ if(ev.key === 'Escape') closeLightbox(); });
+
+  /* ---------- ADMIN ---------- */
+  const adminTrigger = document.getElementById('adminTrigger');
+  const adminLoginOverlay = document.getElementById('adminLoginOverlay');
+  const adminLoginClose = document.getElementById('adminLoginClose');
+  const adminPassInput = document.getElementById('adminPassInput');
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+  const adminLoginMsg = document.getElementById('adminLoginMsg');
+  const adminPanelOverlay = document.getElementById('adminPanelOverlay');
+  const adminPanelClose = document.getElementById('adminPanelClose');
+  const adminStats = document.getElementById('adminStats');
+  const adminDonut = document.getElementById('adminDonut');
+  const adminChartLegend = document.getElementById('adminChartLegend');
+  const adminTbody = document.getElementById('adminTbody');
+  const adminHeaderCheck = document.getElementById('adminHeaderCheck');
+  const adminSelCount = document.getElementById('adminSelCount');
+  const adminDeleteSelected = document.getElementById('adminDeleteSelected');
+  const adminSelectAll = document.getElementById('adminSelectAll');
+  const adminExport = document.getElementById('adminExport');
+  const adminRefresh = document.getElementById('adminRefresh');
+  const adminPanelMsg = document.getElementById('adminPanelMsg');
+
+  let adminKey = sessionStorage.getItem('fishingscam_admin_key') || '';
+  let adminEntries = [];
+
+  adminTrigger.addEventListener('click', ()=>{
+    if(adminKey){
+      openAdminPanel();
+    }else{
+      adminLoginOverlay.classList.add('active');
+      adminPassInput.focus();
+    }
+  });
+  adminLoginClose.addEventListener('click', ()=> adminLoginOverlay.classList.remove('active'));
+  adminPanelClose.addEventListener('click', ()=> adminPanelOverlay.classList.remove('active'));
+
+  async function tryAdminLogin(){
+    adminLoginMsg.textContent = '';
+    const pass = adminPassInput.value;
+    if(!pass) return;
+    adminLoginBtn.disabled = true;
+    adminLoginBtn.textContent = 'CHECKING...';
+    try{
+      const resp = await fetch('/api/admin?action=list', {
+        headers: { 'x-admin-key': pass }
+      });
+      if(resp.status === 401){
+        adminLoginMsg.textContent = 'Wrong password.';
+        return;
+      }
+      if(!resp.ok){
+        const j = await resp.json().catch(()=>({}));
+        adminLoginMsg.textContent = j.error || 'Something went wrong.';
+        return;
+      }
+      adminKey = pass;
+      sessionStorage.setItem('fishingscam_admin_key', pass);
+      adminLoginOverlay.classList.remove('active');
+      adminPassInput.value = '';
+      openAdminPanel();
+    }catch(e){
+      adminLoginMsg.textContent = 'Network error.';
+    }finally{
+      adminLoginBtn.disabled = false;
+      adminLoginBtn.textContent = 'UNLOCK';
+    }
+  }
+  adminLoginBtn.addEventListener('click', tryAdminLogin);
+  adminPassInput.addEventListener('keydown', (ev)=>{ if(ev.key === 'Enter') tryAdminLogin(); });
+
+  async function openAdminPanel(){
+    adminPanelOverlay.classList.add('active');
+    await loadAdminEntries();
+  }
+
+  async function loadAdminEntries(){
+    adminPanelMsg.textContent = 'Loading...';
+    try{
+      const resp = await fetch('/api/admin?action=list', { headers: { 'x-admin-key': adminKey } });
+      if(resp.status === 401){
+        adminKey = '';
+        sessionStorage.removeItem('fishingscam_admin_key');
+        adminPanelOverlay.classList.remove('active');
+        adminLoginOverlay.classList.add('active');
+        adminLoginMsg.textContent = 'Session expired — log in again.';
+        return;
+      }
+      const data = await resp.json();
+      adminEntries = data.entries || [];
+      renderAdminStats();
+      renderAdminTable();
+      adminPanelMsg.textContent = '';
+    }catch(e){
+      adminPanelMsg.textContent = 'Failed to load entries.';
+    }
+  }
+
+  function renderAdminStats(){
+    const total = adminEntries.length;
+    const bringing = adminEntries.filter(e=> e.pledge === 'yes').length;
+    const bodyOnly = total - bringing;
+    adminStats.innerHTML = `
+      <div class="admin-stat"><div class="num">${total}</div><div class="lbl">TOTAL CONFIRMED</div></div>
+      <div class="admin-stat"><div class="num">${bringing}</div><div class="lbl">BRINGING SOMETHING</div></div>
+      <div class="admin-stat"><div class="num">${bodyOnly}</div><div class="lbl">BODY ONLY</div></div>
+    `;
+    const total2 = Math.max(total, 1);
+    const bringPct = bringing / total2;
+    const r = 50, cx = 60, cy = 60;
+    const circumference = 2 * Math.PI * r;
+    const bringLen = circumference * bringPct;
+    adminDonut.innerHTML = `
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#12262955" stroke-width="16"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#5C8A6C" stroke-width="16"
+        stroke-dasharray="${bringLen} ${circumference - bringLen}"
+        stroke-dashoffset="${circumference * 0.25}" stroke-linecap="butt"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E8873A" stroke-width="16"
+        stroke-dasharray="${circumference - bringLen} ${bringLen}"
+        stroke-dashoffset="${circumference * 0.25 - bringLen}" stroke-linecap="butt"/>
+    `;
+    adminChartLegend.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="width:10px;height:10px;background:#5C8A6C;border-radius:2px;display:inline-block;"></span>Bringing something (${bringing})</div>
+      <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;background:#E8873A;border-radius:2px;display:inline-block;"></span>Body + reason (${bodyOnly})</div>
+    `;
+  }
+
+  function escapeHtmlAdmin(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function renderAdminTable(){
+    if(adminEntries.length === 0){
+      adminTbody.innerHTML = '<tr><td colspan="5" class="mono" style="color:var(--muted);">No entries yet.</td></tr>';
+      updateAdminSelCount();
+      return;
+    }
+    const sorted = [...adminEntries].sort((a,b)=> (b.ts||0) - (a.ts||0));
+    adminTbody.innerHTML = sorted.map(e=>{
+      const date = e.ts ? new Date(e.ts).toLocaleString() : '—';
+      const pledgeText = e.pledge === 'yes' ? (e.item || 'Bringing something') : 'Lawas ug katarongan';
+      return `<tr data-id="${escapeHtmlAdmin(e.id)}">
+        <td><input type="checkbox" class="admin-row-check"></td>
+        <td>${escapeHtmlAdmin(e.name)}</td>
+        <td class="mono">${escapeHtmlAdmin(e.contact)}</td>
+        <td>${escapeHtmlAdmin(pledgeText)}</td>
+        <td class="mono" style="font-size:11px;">${date}</td>
+      </tr>`;
+    }).join('');
+    adminHeaderCheck.checked = false;
+    updateAdminSelCount();
+    document.querySelectorAll('.admin-row-check').forEach(cb=>{
+      cb.addEventListener('change', updateAdminSelCount);
+    });
+  }
+
+  function getSelectedIds(){
+    return [...document.querySelectorAll('.admin-row-check')]
+      .map((cb,i)=> cb.checked ? cb.closest('tr').dataset.id : null)
+      .filter(Boolean);
+  }
+  function updateAdminSelCount(){
+    const n = getSelectedIds().length;
+    adminSelCount.textContent = n;
+    adminDeleteSelected.disabled = n === 0;
+  }
+
+  adminHeaderCheck.addEventListener('change', ()=>{
+    document.querySelectorAll('.admin-row-check').forEach(cb=> cb.checked = adminHeaderCheck.checked);
+    updateAdminSelCount();
+  });
+  adminSelectAll.addEventListener('click', ()=>{
+    adminHeaderCheck.checked = true;
+    document.querySelectorAll('.admin-row-check').forEach(cb=> cb.checked = true);
+    updateAdminSelCount();
+  });
+
+  adminDeleteSelected.addEventListener('click', async ()=>{
+    const ids = getSelectedIds();
+    if(ids.length === 0) return;
+    if(!confirm(`Delete ${ids.length} entr${ids.length === 1 ? 'y' : 'ies'}? This can't be undone.`)) return;
+    adminPanelMsg.textContent = 'Deleting...';
+    try{
+      const resp = await fetch('/api/admin?action=delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+        body: JSON.stringify({ ids })
+      });
+      if(!resp.ok){
+        const j = await resp.json().catch(()=>({}));
+        adminPanelMsg.textContent = j.error || 'Delete failed.';
+        return;
+      }
+      await loadAdminEntries();
+      loadBoard();
+      adminPanelMsg.textContent = 'Deleted.';
+    }catch(e){
+      adminPanelMsg.textContent = 'Network error while deleting.';
+    }
+  });
+
+  adminRefresh.addEventListener('click', loadAdminEntries);
+
+  adminExport.addEventListener('click', ()=>{
+    const rows = [['Name','Contact','Pledge','Item','Submitted']];
+    adminEntries.forEach(e=>{
+      rows.push([
+        e.name, e.contact, e.pledge === 'yes' ? 'Bringing' : 'Body only',
+        e.item || '', e.ts ? new Date(e.ts).toISOString() : ''
+      ]);
+    });
+    const csv = rows.map(r=> r.map(v=> `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'fishing-scam-catch-list.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 </script>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<div class="admin-trigger" id="adminTrigger" title="Admin">⚙</div>
+
+<div class="admin-overlay" id="adminLoginOverlay">
+  <div class="admin-box">
+    <button class="admin-close" id="adminLoginClose">&times;</button>
+    <div class="admin-title">Admin Access</div>
+    <div class="admin-sub mono">Enter the admin password to manage the catch list.</div>
+    <input type="password" class="admin-field" id="adminPassInput" placeholder="Password">
+    <button class="admin-btn" id="adminLoginBtn" style="width:100%;">UNLOCK</button>
+    <div class="admin-msg err" id="adminLoginMsg"></div>
+  </div>
+</div>
+
+<div class="admin-overlay" id="adminPanelOverlay">
+  <div class="admin-panel">
+    <button class="admin-close" id="adminPanelClose">&times;</button>
+    <div class="admin-title">Catch List — Admin</div>
+    <div class="admin-sub mono">Full entries, summary, and management tools.</div>
+
+    <div class="admin-stats" id="adminStats"></div>
+
+    <div class="admin-chart-wrap">
+      <svg id="adminDonut" width="120" height="120" viewBox="0 0 120 120"></svg>
+      <div id="adminChartLegend" class="mono" style="font-size:12px; color:var(--muted);"></div>
+    </div>
+
+    <div class="admin-actions">
+      <button class="admin-btn" id="adminSelectAll">SELECT ALL</button>
+      <button class="admin-btn" id="adminExport">EXPORT CSV</button>
+      <button class="admin-btn danger" id="adminDeleteSelected" disabled>DELETE SELECTED (<span id="adminSelCount">0</span>)</button>
+      <button class="admin-btn" id="adminRefresh">REFRESH</button>
+    </div>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="adminHeaderCheck"></th>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Pledge</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody id="adminTbody"></tbody>
+      </table>
+    </div>
+    <div class="admin-msg" id="adminPanelMsg"></div>
+  </div>
+</div>
 
 </body>
 </html>

@@ -2,6 +2,11 @@ const { Redis } = require('@upstash/redis');
 
 const redis = Redis.fromEnv();
 
+function normalizeContact(raw) {
+  const digits = String(raw || '').replace(/\D/g, '');
+  return digits.slice(-10); // last 10 digits, normalizes 0917... vs +63917... etc.
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -20,6 +25,15 @@ module.exports = async (req, res) => {
       return;
     }
 
+    const normalizedContact = normalizeContact(contact);
+    if (normalizedContact.length >= 7) {
+      const existingId = await redis.hget('rsvp:contact-index', normalizedContact);
+      if (existingId) {
+        res.status(409).json({ error: "This contact number is already on the list." });
+        return;
+      }
+    }
+
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     const record = {
       id,
@@ -35,6 +49,10 @@ module.exports = async (req, res) => {
     const ids = (await redis.get('rsvp:index')) || [];
     ids.push(id);
     await redis.set('rsvp:index', ids);
+
+    if (normalizedContact.length >= 7) {
+      await redis.hset('rsvp:contact-index', { [normalizedContact]: id });
+    }
 
     res.status(200).json({ ok: true, record });
   } catch (err) {
