@@ -293,29 +293,45 @@
   /* ---------- GALLERY (carousel) ---------- */
   .gallery-carousel{
     position:relative;
-    max-width:720px;
+    max-width:920px;
     margin:0 auto;
   }
   .gallery-track{
     position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    height:420px;
+    overflow:hidden;
+  }
+  .g-item{
+    position:relative;
+    flex:0 0 auto;
+    width:62%;
+    height:100%;
     border-radius:10px;
     overflow:hidden;
     border:1px solid var(--line);
-    min-height:420px;
-  }
-  .g-item{
-    position:absolute;
-    inset:0;
     background-size:cover;
     background-position:center;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .35s ease;
+    opacity:0.35;
+    filter:grayscale(35%) brightness(0.55);
+    transform:scale(0.82);
+    transition:opacity .4s ease, filter .4s ease, transform .4s ease;
     cursor:zoom-in;
+    pointer-events:none;
+  }
+  .g-item.side{
+    width:26%;
+    pointer-events:auto;
   }
   .g-item.active{
     opacity:1;
+    filter:grayscale(0%) brightness(1);
+    transform:scale(1);
     pointer-events:auto;
+    z-index:2;
   }
   .g-item::after{
     content:"";
@@ -324,7 +340,10 @@
   }
   .g-item .g-cap{
     position:absolute; left:16px; bottom:14px; right:16px; z-index:2;
+    opacity:0;
+    transition:opacity .3s ease;
   }
+  .g-item.active .g-cap{ opacity:1; }
   .g-cap .g-title{ font-family:'Anton', sans-serif; font-size:1.05rem; color:var(--sand); letter-spacing:0.3px;}
   .g-cap .g-sub{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ember-soft); margin-top:3px;}
   .gallery-arrow{
@@ -353,6 +372,11 @@
     transition:background .15s ease;
   }
   .gallery-dot.active{ background:var(--ember-soft); }
+  @media (max-width:640px){
+    .gallery-track{ height:280px; gap:8px; }
+    .g-item.side{ width:14%; }
+    .g-item.active{ width:70%; }
+  }
 
   /* ---------- RSVP ---------- */
   .rsvp-section{
@@ -477,6 +501,46 @@
     background:rgba(232,135,58,0.14);
     color:var(--ember-soft);
     border:1px solid rgba(232,135,58,0.35);
+  }
+
+  /* ---------- CATCH LIST SUMMARY (public) ---------- */
+  .board-summary{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:18px;
+  }
+  .board-summary .bs-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    flex:1 1 220px;
+  }
+  .board-summary .bs-stat{
+    background:var(--bg-deep);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 8px;
+    text-align:center;
+  }
+  .board-summary .bs-stat .num{ font-family:'Anton', sans-serif; font-size:1.4rem; color:var(--ember-soft); line-height:1; }
+  .board-summary .bs-stat .lbl{ font-family:'IBM Plex Mono', monospace; font-size:9px; color:var(--muted); margin-top:4px; letter-spacing:0.3px; }
+  .board-summary .bs-chart-wrap{
+    display:flex; align-items:center; gap:14px;
+    flex:0 0 auto;
+  }
+  .board-summary .bs-legend{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--muted); }
+  .board-summary .bs-legend div{ display:flex; align-items:center; gap:6px; margin-bottom:5px; white-space:nowrap; }
+  .board-summary .bs-legend div:last-child{ margin-bottom:0; }
+  .board-summary .bs-legend span.sw{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  @media (max-width:520px){
+    .board-summary{ flex-direction:column; align-items:stretch; }
+    .board-summary .bs-chart-wrap{ justify-content:center; }
   }
 
   /* ---------- FOOTER ---------- */
@@ -825,6 +889,17 @@
         <h3 class="display">The Catch List</h3>
         <span class="count mono" id="boardCount">0 confirmed</span>
       </div>
+      <div class="board-summary" id="boardSummary">
+        <div class="bs-stats">
+          <div class="bs-stat"><div class="num" id="bsTotal">0</div><div class="lbl">TOTAL CONFIRMED</div></div>
+          <div class="bs-stat"><div class="num" id="bsBringing">0</div><div class="lbl">BRINGING SOMETHING</div></div>
+          <div class="bs-stat"><div class="num" id="bsBodyOnly">0</div><div class="lbl">BODY ONLY</div></div>
+        </div>
+        <div class="bs-chart-wrap">
+          <svg id="boardDonut" width="72" height="72" viewBox="0 0 120 120"></svg>
+          <div class="bs-legend" id="boardChartLegend"></div>
+        </div>
+      </div>
       <div class="board-list" id="boardList">
         <div class="board-empty">No victims yet. Be the first to get caught.</div>
       </div>
@@ -924,8 +999,44 @@
     return div.innerHTML;
   }
 
+  const bsTotal = document.getElementById('bsTotal');
+  const bsBringing = document.getElementById('bsBringing');
+  const bsBodyOnly = document.getElementById('bsBodyOnly');
+  const boardDonut = document.getElementById('boardDonut');
+  const boardChartLegend = document.getElementById('boardChartLegend');
+
+  function renderBoardSummary(entries){
+    const total = entries.length;
+    const bringing = entries.filter(e=> e.pledge === 'yes').length;
+    const bodyOnly = total - bringing;
+
+    bsTotal.textContent = total;
+    bsBringing.textContent = bringing;
+    bsBodyOnly.textContent = bodyOnly;
+
+    const total2 = Math.max(total, 1);
+    const bringPct = bringing / total2;
+    const r = 50, cx = 60, cy = 60;
+    const circumference = 2 * Math.PI * r;
+    const bringLen = circumference * bringPct;
+    boardDonut.innerHTML = `
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#12262955" stroke-width="16"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#5C8A6C" stroke-width="16"
+        stroke-dasharray="${bringLen} ${circumference - bringLen}"
+        stroke-dashoffset="${circumference * 0.25}" stroke-linecap="butt"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E8873A" stroke-width="16"
+        stroke-dasharray="${circumference - bringLen} ${bringLen}"
+        stroke-dashoffset="${circumference * 0.25 - bringLen}" stroke-linecap="butt"/>
+    `;
+    boardChartLegend.innerHTML = `
+      <div><span class="sw" style="background:#5C8A6C;"></span>Bringing something (${bringing})</div>
+      <div><span class="sw" style="background:#E8873A;"></span>Body + reason (${bodyOnly})</div>
+    `;
+  }
+
   function renderBoard(entries){
     boardCount.textContent = entries.length + (entries.length === 1 ? ' confirmed' : ' confirmed');
+    renderBoardSummary(entries);
     if(entries.length === 0){
       boardList.innerHTML = '<div class="board-empty">No victims yet. Be the first to get caught.</div>';
       return;
@@ -1057,7 +1168,21 @@
 
     function show(index){
       current = (index + slides.length) % slides.length; // loop both directions
-      slides.forEach((s,i)=> s.classList.toggle('active', i === current));
+      const prevIdx = (current - 1 + slides.length) % slides.length;
+      const nextIdx = (current + 1) % slides.length;
+
+      slides.forEach((s,i)=>{
+        s.classList.remove('active','side');
+        if(i === current) s.classList.add('active');
+        else if(i === prevIdx || i === nextIdx) s.classList.add('side');
+      });
+
+      // reorder in the flex track so active sits visually in the middle,
+      // flanked by prev/next, with everything else stacked off to the side
+      const ordered = [prevIdx, current, nextIdx];
+      slides.forEach((s,i)=>{ if(!ordered.includes(i)) ordered.push(i); });
+      ordered.forEach(i=> track.appendChild(slides[i]));
+
       dots.forEach((d,i)=> d.classList.toggle('active', i === current));
     }
 
@@ -1065,6 +1190,15 @@
     nextBtn.addEventListener('click', ()=> show(current + 1));
     dots.forEach(d=>{
       d.addEventListener('click', ()=> show(parseInt(d.dataset.index, 10)));
+    });
+    slides.forEach((s,i)=>{
+      s.addEventListener('click', (ev)=>{
+        // clicking a side (non-active) slide should navigate to it instead of opening the lightbox
+        if(i !== current){
+          ev.stopPropagation();
+          show(i);
+        }
+      }, true);
     });
 
     show(0);
